@@ -67,7 +67,7 @@
                 <p>
                 Compare {{ machine.name }} to
                 <select name="compare_to_id">
-                    {%  for machine in machines %}
+                    {%  for machine in machines_by_name %}
                         <option value="{{ machine.id }}">{{ machine.name }}:{{ machine.id }}</option>
                     {% endfor %}
                 </select>

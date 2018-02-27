@@ -325,6 +325,7 @@ def v4_machine(id):
         return flask.jsonify(**json_obj)
 
     machines = session.query(ts.Machine).all()
+    machines_by_name = sorted(machines, key = lambda m: m.name)
     relatives = [m for m in machines if m.name == machine.name]
     return render_template("v4_machine.html",
                            testsuite_name=g.testsuite_name,
@@ -332,6 +333,7 @@ def v4_machine(id):
                            associated_runs=associated_runs,
                            machine=machine,
                            machines=machines,
+                           machines_by_name=machines_by_name,
                            relatives=relatives,
                            **ts_data(ts))
 
