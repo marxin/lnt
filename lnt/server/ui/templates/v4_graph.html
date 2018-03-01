@@ -92,7 +92,8 @@ function init_graph() {
         clickable: true },
         yaxis: {
           transform: transform_fn,
-          inverseTransform: inverse_transform_fn }
+          inverseTransform: inverse_transform_fn },
+        xaxis: { mode: 'time' },
       };
 
   // Add baseline lines
@@ -126,7 +127,9 @@ function init_graph() {
         enabled: false
 {% endif %}
     },
-    yaxis: { ticks: [] } });
+    yaxis: { ticks: [] },
+    xaxis: { mode: 'time' },
+    });
 
   // Connect selection on the overview graph to the main plot.
   $("#overview").bind("plotselected", function (event, ranges) {
