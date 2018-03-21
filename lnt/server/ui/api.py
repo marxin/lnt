@@ -72,6 +72,10 @@ class Fields(Resource):
         result = common_fields_factory()
         result['fields'] = [{'column_id': i, 'column_name': f.column.name}
                 for i, f in enumerate(ts.sample_fields)]
+
+        tests = request.session.query(ts.Test).all()
+        result['tests'] = [t.__json__() for t in tests]
+
         return result
 
 class Machines(Resource):
