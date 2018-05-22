@@ -8,7 +8,7 @@
 {%- endmacro %}
 
 {% macro render_compare_to_run(run, url) -%}
-<a href="{{url}}"><span class="utctime">{{ run.start_time.isoformat() }}</span></a>
+<a href="{{url}}"><span class="utctime">{{ run.start_time.isoformat() }}</span> ({{ run.order.llvm_project_revision | git_revision }})</a>
 {%- endmacro %}
 
 {# Some example settings from llvm.org. #}

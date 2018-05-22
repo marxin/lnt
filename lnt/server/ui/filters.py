@@ -53,6 +53,8 @@ def filter_producerAsHTML(producer):
 def filter_shortname(test_name):
     return util.guess_test_short_name(test_name)
 
+def filter_git_revision(revision):
+    return revision.split('.')[1][:16]
 
 def register(env):
     for name, object in globals().items():
