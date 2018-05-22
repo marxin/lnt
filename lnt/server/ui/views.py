@@ -324,7 +324,7 @@ def v4_machine(id):
                                          run.end_time.isoformat()))
         return flask.jsonify(**json_obj)
 
-    machines = session.query(ts.Machine).all()
+    machines = sorted(session.query(ts.Machine).all(), key = lambda m: m.name)
     relatives = [m for m in machines if m.name == machine.name]
     return render_template("v4_machine.html",
                            testsuite_name=g.testsuite_name,
