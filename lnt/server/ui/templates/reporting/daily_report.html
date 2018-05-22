@@ -1,4 +1,5 @@
 {% import "utils.html" as utils %}
+{% import "local.html" as local %}
 {% if not only_html_body %}
 <html>
 <head>
@@ -71,7 +72,7 @@
       {# FIXME: Don't hard code field name. #}
       <td style="{{ styles.td }}">
         <a href="{{ ts_url }}/{{ key_run.id }}">{{
-          key_run.order.llvm_project_revision}}</a></td>
+          local.render_run(key_run.order.llvm_project_revision) }}</a></td>
 {%-   else -%}
       <td style="{{ styles.td }}; background-color:#FF0000">N/A</td>
 {%-   endif -%}

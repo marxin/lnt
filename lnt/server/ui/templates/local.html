@@ -5,10 +5,17 @@
 
 {% macro render_order_link(order) -%}
     <a href="{{v4_url_for('.v4_order', id=order.id)}}">{{ prefix }}{{order.llvm_project_revision}}</a>
+    <a href="https://gcc.gnu.org/git/?p=gcc.git;a=commit;h={{order.llvm_project_revision | git_revision}}">
+      <i class="icon-share-alt"></i>
+    </a>
 {%- endmacro %}
 
 {% macro render_compare_to_run(run, url) -%}
-<a href="{{url}}"><span class="utctime">{{ run.start_time.isoformat() }}</span></a>
+<a href="{{url}}"><span class="utctime">{{ run.start_time.isoformat() }}</span> ({{ run.order.llvm_project_revision | git_revision }})</a>
+{%- endmacro %}
+
+{% macro render_run(run) -%}
+{{ run | git_readable_revision }}
 {%- endmacro %}
 
 {# Some example settings from llvm.org. #}
