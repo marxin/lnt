@@ -1264,6 +1264,7 @@ def determine_x_value(point_label, fallback, revision_cache):
     :return: an integer or float value that is like the point_label or fallback.
 
     """
+    return(int(point_label.split('.')[0]))
     rev_x = convert_revision(point_label, revision_cache)
     if len(rev_x) == 1:
         x = rev_x[0]
