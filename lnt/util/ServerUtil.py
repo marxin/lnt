@@ -29,7 +29,8 @@ def _show_json_error(reply):
         sys.stderr.write(message + '\n')
 
 
-def submitFileToServer(url, file, select_machine=None, merge_run=None):
+def submitFileToServer(url, file, select_machine=None, merge_run=None,
+        secret_key=None):
     with open(file, 'rb') as f:
         values = {
             'input_data': f.read(),
@@ -40,6 +41,8 @@ def submitFileToServer(url, file, select_machine=None, merge_run=None):
         if merge_run is not None:
             values['merge'] = merge_run
     headers = {'Accept': 'application/json'}
+    if secret_key:
+        headers['AuthToken'] = secret_key
     data = urllib.urlencode(values)
     try:
         response = urllib2.urlopen(urllib2.Request(url, data, headers=headers))
@@ -82,20 +85,23 @@ def submitFileToInstance(path, file, select_machine=None, merge_run=None):
             select_machine=select_machine, merge_run=merge_run)
 
 
-def submitFile(url, file, verbose, select_machine=None, merge_run=None):
+def submitFile(url, file, verbose, select_machine=None, merge_run=None,
+        secret_key=None):
     # If this is a real url, submit it using urllib.
     if '://' in url:
-        result = submitFileToServer(url, file, select_machine, merge_run)
+        result = submitFileToServer(url, file, select_machine, merge_run,
+                secret_key)
     else:
         result = submitFileToInstance(url, file, select_machine, merge_run)
     return result
 
 
-def submitFiles(url, files, verbose, select_machine=None, merge_run=None):
+def submitFiles(url, files, verbose, select_machine=None, merge_run=None,
+        secret_key=None):
     results = []
     for file in files:
         result = submitFile(url, file, verbose, select_machine=select_machine,
-                            merge_run=merge_run)
+                            merge_run=merge_run, secret_key=secret_key)
         if result:
             results.append(result)
     return results

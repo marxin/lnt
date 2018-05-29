@@ -182,14 +182,14 @@ def action_showtests():
 @submit_options
 @click.option("--verbose", "-v", is_flag=True,
               help="show verbose test results")
-def action_submit(url, files, select_machine, merge, verbose):
+def action_submit(url, files, select_machine, merge, secret_key, verbose):
     """submit a test report to the server"""
     from lnt.util import ServerUtil
     import lnt.util.ImportData
 
     results = ServerUtil.submitFiles(url, files, verbose,
                                      select_machine=select_machine,
-                                     merge_run=merge)
+                                     merge_run=merge, secret_key=secret_key)
     for submitted_file in results:
         if verbose:
             lnt.util.ImportData.print_report_result(

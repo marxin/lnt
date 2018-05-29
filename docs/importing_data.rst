@@ -23,6 +23,9 @@ Example::
     lnt importreport --machine=my-machine-name --order=1234 --testsuite=nts results.txt report.json
     lnt submit http://mylnt.com/db_default/submitRun report.json
 
+LNT server can request authentization when ``secret_key`` is set in LNT config file.
+Auth token can be set via ``--secret-key=mykey`` option.
+
 .. _json_format:
 
 LNT Report File Format

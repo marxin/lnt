@@ -102,6 +102,13 @@ def index():
 # Database Actions
 def _do_submit():
     assert request.method == 'POST'
+
+    token = request.headers.get("AuthToken", None)
+    if current_app.old_config.secretKey \
+            and token != current_app.old_config.secretKey:
+                abort(401, "Auth Token must be passed in AuthToken header, "
+                        "and must match secret_key in LNT config.")
+
     input_file = request.files.get('file')
     input_data = request.form.get('input_data')
     if 'select_machine' not in request.form and \

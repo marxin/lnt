@@ -12,6 +12,9 @@ def submit_options(func):
     func = click.option("--merge", default="replace", show_default=True,
                         type=click.Choice(['reject', 'replace', 'append']),
                         help="Merge strategy when run already exists")(func)
+    func = click.option("--secret-key",
+                        help="Secret key of the LNT server if secret_key is " \
+                                "set in LNT config")(func)
     return func
 
 
