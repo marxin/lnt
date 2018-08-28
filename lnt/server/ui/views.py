@@ -9,6 +9,7 @@ import flask
 import sqlalchemy.sql
 from flask import abort
 from flask import current_app
+from flask import json, jsonify
 from flask import flash
 from flask import g
 from flask import make_response
@@ -26,6 +27,7 @@ import lnt.server.db.rules_manager
 import lnt.server.db.search
 import lnt.server.reporting.analysis
 import lnt.server.reporting.dailyreport
+import lnt.server.reporting.latestrunsreport
 import lnt.server.reporting.runs
 import lnt.server.reporting.summaryreport
 import lnt.server.ui.util
@@ -1514,6 +1516,25 @@ def v4_summary_report_ui():
                            config=config, all_machines=all_machines,
                            all_orders=all_orders, **ts_data(ts))
 
+@v4_route("/latest_runs_report")
+def v4_latest_runs_report():
+    # Redirect to the report for the most recent submitted run's date.
+
+    session = request.session
+    ts = request.get_testsuite()
+
+    # Create the report object.
+    report = lnt.server.reporting.latestrunsreport.LatestRunsReport(ts, 10)
+
+    # Build the report.
+    try:
+        report.build(request.session)
+    except ValueError:
+        return abort(400)
+
+    return render_template("v4_latest_runs_report.html", report=report,
+                           analysis=lnt.server.reporting.analysis,
+                           **ts_data(ts))
 
 @db_route("/summary_report")
 def v4_summary_report():
