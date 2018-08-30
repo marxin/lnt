@@ -127,4 +127,5 @@ report_css_styles = {
             "cursor: default; text-align:center; font-weight: bold; "
             "font-family: Verdana; padding:5px; padding-left:8px"),
         "td": "padding:5px; padding-left:8px",
+        "right": "text-align: right;"
         }

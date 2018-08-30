@@ -62,6 +62,22 @@ def filter_git_readable_revision(revision):
     ts_string = ts.strftime('%Y-%m-%d %H:%M')
     return '%s (%s)' % (filter_git_revision(revision), ts_string)
 
+def filter_filesize(value):
+    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+        if abs(value) < 1024.0:
+            return "%3.2f %s%s" % (value, unit, 'B')
+        value /= 1024.0
+    return "%.2f%s%s" % (value, 'Yi', suffix)
+
+def filter_print_value(value, field_name, default = '-'):
+    if value == None:
+        return default
+
+    if field_name == 'size' or field_name == 'mem_bytes':
+        return filter_filesize(value)
+    else:
+        return '%.3f' % value
+
 def register(env):
     for name, object in globals().items():
         if name.startswith('filter_'):
