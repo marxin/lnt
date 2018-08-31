@@ -44,7 +44,7 @@
                                 <td class="test-name" style="{{ styles.td }}"><a href="{{
                   ts_url}}/graph?plot.0={{machine.id}}.{{test.id}}.{{
                     report.ts.get_field_index(field)}}">{{test.name}}</a></td>
-                                {{ reportutils.get_initial_cell_value(test_results[-1], analysis, styles) }}
+                                {{ reportutils.get_initial_cell_value(test_results[-1], field, analysis, styles) }}
                                 {% for result in test_results[:-1]|reverse %}
                                     {{ reportutils.get_cell_value(result, analysis, styles) }}
                                 {% endfor %}
