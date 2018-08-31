@@ -62,6 +62,22 @@ def filter_git_readable_revision(revision):
     ts_string = ts.strftime('%Y-%m-%d %H:%M')
     return '%s (%s)' % (filter_git_revision(revision), ts_string)
 
+def filter_value_with_unit(value, unit_abbrev):
+    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+        if abs(value) < 1024.0:
+            return "%3.2f %s%s" % (value, unit, unit_abbrev)
+        value /= 1024.0
+    return "%.2f%s%s" % (value, 'Yi', unit_abbrev)
+
+def filter_print_value(value, field_unit_abbrev, default = '-'):
+    if value == None:
+        return default
+
+    if field_unit_abbrev:
+        return filter_value_with_unit(value, field_unit_abbrev)
+    else:
+        return '%.3f' % value
+
 def register(env):
     for name, object in globals().items():
         if name.startswith('filter_'):

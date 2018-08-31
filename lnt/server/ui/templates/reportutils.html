@@ -3,10 +3,11 @@
 {%- set test_status = cr.get_test_status() -%}
 {%- if (test_status == analysis.REGRESSED or
        test_status == analysis.UNCHANGED_FAIL) %}
-    <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
+       <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
 {%- else %}
     <td style="{{ styles.td }}; {{ styles.right }}; background-color:#d2d2d2"> {#- -#}
-      {{ ("%.4f" % cr.current) if cr.current != none else "N/A" }}</td>
+        {{ cr.current|print_value(field.unit_abbrev) }}
+    </td>
 {%- endif -%}
 {% endmacro %}
 

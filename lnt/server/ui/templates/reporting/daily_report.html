@@ -68,7 +68,7 @@
     <tr class="searchable">
       <td class="machine-name" style="{{ styles.td }}">{{machine.name}}</td>
 {%- for i in range(report.num_prior_days_to_include)|reverse %}
-{%-   set key_run = report.get_key_run(machine, i) -%}
+    {%-   set key_run = report.get_key_run(machine, i) -%}
 {%-   if key_run -%}
       {# FIXME: Don't hard code field name. #}
       <td style="{{ styles.td }}">
@@ -160,7 +160,7 @@
     {{ reportutils.get_cell_value(day_result, analysis, styles) }}
 {%-        else -%}
 {%-        set first_result_shown = true -%}
-    {{ reportutils.get_initial_cell_value(day_result, analysis, styles) }}
+{{ reportutils.get_initial_cell_value(day_result, field, analysis, styles) }}
 {%-        endif -%}
 {%-      endif -%}
 {%-    endfor %}
