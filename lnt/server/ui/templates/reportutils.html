@@ -1,11 +1,11 @@
-{% macro get_initial_cell_value(result, analysis, styles) %}
+{% macro get_initial_cell_value(result, field, analysis, styles) %}
 {%- set cr = result.cr -%}
 {%- set test_status = cr.get_test_status() -%}
 {%- if (test_status == analysis.REGRESSED or
        test_status == analysis.UNCHANGED_FAIL) %}
     <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
 {%- else %}
-    <td style="{{ styles.td }}; background-color:#d2d2d2"> {#- -#}
+    <td style="{{ styles.td }}; {{ styles.right }}; background-color:#d2d2d2"> {#- -#}
       {{ ("%.4f" % cr.current) if cr.current != none else "N/A" }}</td>
 {%- endif -%}
 {% endmacro %}
@@ -22,7 +22,7 @@
 {%- else -%}
 {%- if (value_status == analysis.REGRESSED or
        value_status == analysis.IMPROVED) %}
-    {{ cr.pct_delta|aspctcell(reverse=cr.bigger_is_better)|safe }}
+    {{ cr.pct_delta|aspctcell(reverse=cr.bigger_is_better, style = styles.right)|safe }}
 {%- else %}
     <td style="{{ styles.td }}">-</td>
 {%- endif -%}
