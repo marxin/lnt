@@ -16,6 +16,7 @@ from flask import request
 from flask import jsonify
 from flask import render_template
 from flask_restful import Api
+from werkzeug.contrib.fixers import ProxyFix
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
@@ -220,6 +221,7 @@ class App(LNTExceptionLoggerFlask):
 
         # Inject a fix for missing slashes on the root URL (see Flask issue
         # #169).
+        self.wsgi_app = ProxyFix(self.wsgi_app)
         self.wsgi_app = RootSlashPatchMiddleware(self.wsgi_app)
         self.logger.setLevel(logging.DEBUG)
 
