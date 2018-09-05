@@ -162,6 +162,11 @@
                               <li><a href="{{ v4_url_for('.v4_global_status') }}">Global Status</a></li>
                               <li><a href="{{ v4_url_for('.v4_daily_report_overview') }}">Daily Report</a></li>
                               <li><a href="{{ v4_url_for('.v4_latest_runs_report') }}">Latest Runs Report</a></li>
+                              {% if g.testsuite_name == 'SPEC' %}
+                                <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'branch') }}">SPEC Report: branch</a></li>
+                                <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'tuning') }}">SPEC Report: tuning</a></li>
+                                <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'options') }}">SPEC Report: options</a></li>
+                              {% endif %}
                               <li><a href="{{ v4_url_for('.v4_machines') }}">All Machines</a></li>
                                <li class="divider"></li>
                               <li class="disabled"><a href="#">Changes</a></li>

@@ -27,6 +27,7 @@ import lnt.server.db.search
 import lnt.server.reporting.analysis
 import lnt.server.reporting.dailyreport
 import lnt.server.reporting.latestrunsreport
+import lnt.server.reporting.specreport
 import lnt.server.reporting.runs
 import lnt.server.reporting.summaryreport
 import lnt.server.ui.util
@@ -1532,6 +1533,23 @@ def v4_latest_runs_report():
 
     return render_template("v4_latest_runs_report.html", report=report,
                            analysis=lnt.server.reporting.analysis,
+                           **ts_data(ts))
+
+@v4_route("/spec_report/<report_type>")
+def v4_spec_report(report_type):
+    session = request.session
+    ts = request.get_testsuite()
+
+    report_types = ['branch', 'tuning', 'options']
+    if not report_type in report_types:
+        return "wrong report type", 500
+
+    report = lnt.server.reporting.specreport.SPECReport(ts, report_type)
+    report.build(request.session)
+
+    return render_template("v4_spec_report.html", report=report,
+                           analysis=lnt.server.reporting.analysis,
+                           report_type = report_type,
                            **ts_data(ts))
 
 @db_route("/summary_report")
