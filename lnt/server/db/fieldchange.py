@@ -14,7 +14,7 @@ from lnt.server.db import rules_manager as rules
 # More runs are slower (more DB access), but may provide
 # more accurate results.
 
-FIELD_CHANGE_LOOKBACK = 10
+FIELD_CHANGE_LOOKBACK = 5
 
 
 def post_submit_tasks(session, ts, run_id):
