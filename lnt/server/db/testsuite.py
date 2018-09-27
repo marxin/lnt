@@ -312,9 +312,6 @@ class SampleField(FieldMixin, Base):
     # This assumption can be inverted by setting this column to nonzero.
     bigger_is_better = Column("bigger_is_better", Integer)
 
-    unit = Column("unit", String(256))
-    unit_abbrev = Column("unit_abbrev", String(256))
-
     def __init__(self, name, type, status_field=None, bigger_is_better=0,
                  display_name=None, unit=None, unit_abbrev=None):
         self.name = name
