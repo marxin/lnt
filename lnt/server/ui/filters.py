@@ -53,6 +53,14 @@ def filter_producerAsHTML(producer):
 def filter_shortname(test_name):
     return util.guess_test_short_name(test_name)
 
+def filter_git_revision(revision):
+    return revision.split('.')[1][:16]
+
+def filter_git_readable_revision(revision):
+    parts = revision.split('.')
+    ts = datetime.datetime.utcfromtimestamp(int(parts[0]) / 1000)
+    ts_string = ts.strftime('%Y-%m-%d %H:%M')
+    return '%s (%s)' % (filter_git_revision(revision), ts_string)
 
 def filter_filesize(value):
     for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
