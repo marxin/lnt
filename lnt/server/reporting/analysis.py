@@ -16,7 +16,7 @@ UNCHANGED_FAIL = 'UNCHANGED_FAIL'
 MIN_VALUE_PRECISION = 0.0001
 
 # Minimal percentage difference that is visible in reports
-MIN_PERCENTAGE_CHANGE = .01
+MIN_PERCENTAGE_CHANGE = .02
 
 def absmin_diff(current, prevs):
     """Min of differences between current sample and all previous samples.
