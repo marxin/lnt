@@ -89,7 +89,8 @@ class SPECReport(object):
     def build(self, session):
         ts = self.ts
 
-        machines = session.query(ts.Machine).all()
+        # TODO: fix properly
+        machines = [m for m in session.query(ts.Machine).all() if not 'honza' in m.name]
         machine_tuples = [MachineTuple(m) for m in machines]
 
         # take only groups with at least 2 members
