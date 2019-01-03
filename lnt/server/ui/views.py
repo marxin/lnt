@@ -35,7 +35,7 @@ import lnt.util
 import lnt.util.ImportData
 import lnt.util.stats
 from lnt.external.stats import stats as ext_stats
-from lnt.server.reporting.analysis import ComparisonResult, calc_geomean
+from lnt.server.reporting.analysis import ComparisonResult, calc_geomean, MIN_PERCENTAGE_CHANGE
 from lnt.server.ui import util
 from lnt.server.ui.decorators import frontend, db_route, v4_route
 from lnt.server.ui.globals import db_url_for, v4_url_for
@@ -1528,7 +1528,21 @@ def v4_latest_runs_report():
     else:
         num_runs = 10
 
-    report = lnt.server.reporting.latestrunsreport.LatestRunsReport(ts, num_runs)
+    all_changes = True if request.args.get('all_changes') else False
+    all_elf_detail_stats = True if request.args.get('all_elf_detail_stats') else False
+    revisions = request.args.get('revisions')
+    if revisions is None:
+        revisions = ""
+
+    min_percentage_change = request.args.get('min_percentage_change')
+    if min_percentage_change is not None:
+        min_percentage_change = float(min_percentage_change)
+    else:
+        min_percentage_change = MIN_PERCENTAGE_CHANGE
+
+    report = lnt.server.reporting.latestrunsreport.LatestRunsReport(ts,
+            num_runs, all_changes, all_elf_detail_stats, revisions,
+            min_percentage_change)
     report.build(request.session)
 
     return render_template("v4_latest_runs_report.html", report=report,

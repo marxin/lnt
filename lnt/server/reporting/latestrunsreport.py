@@ -8,9 +8,13 @@ import sqlalchemy.sql
 import urllib
 
 class LatestRunsReport(object):
-    def __init__(self, ts, run_count):
+    def __init__(self, ts, run_count, all_changes, all_elf_detail_stats, revisions, min_percentage_change):
         self.ts = ts
         self.run_count = run_count
+        self.all_changes = all_changes
+        self.all_elf_detail_stats = all_elf_detail_stats
+        self.revisions = revisions
+        self.min_percentage_change = min_percentage_change
         self.hash_of_binary_field = self.ts.Sample.get_hash_of_binary_field()
         self.fields = list(ts.Sample.get_metric_fields())
 
@@ -32,6 +36,12 @@ class LatestRunsReport(object):
                     .order_by(ts.Run.start_time.desc())
                     .limit(self.run_count)
                     .all()))
+
+                if self.revisions != '':
+                    revisions = [x.strip() for x in self.revisions.split(',')]
+                    machine_runs = [next((mr for mr in machine_runs if mr.order.llvm_project_revision.split('.')[1] == r), None) for r in revisions]
+                    machine_runs = [mr for mr in machine_runs if mr]
+
 
                 if len(machine_runs) < 2:
                     continue
@@ -70,12 +80,14 @@ class LatestRunsReport(object):
                     return (field.name, -int(had_failures), -sum_abs_deltas, test.name)
 
                 for test in run_tests:
+                    if not self.all_elf_detail_stats and 'elf/' in test.name:
+                        continue
+
                     cr = sri.get_comparison_result(
                             [machine_runs[-1]], [oldest_run], test.id, field,
                             self.hash_of_binary_field)
 
-                    # If the result is not "interesting", ignore it.
-                    if not cr.is_result_interesting():
+                    if not self.all_changes and not cr.is_result_interesting(self.min_percentage_change):
                         continue
 
                     # For all previous runs, analyze comparison results
@@ -87,6 +99,10 @@ class LatestRunsReport(object):
                                 self.hash_of_binary_field)
                         test_results.append(RunResult(cr))
 
+                    # If all results are not "interesting", ignore them.
+                    if all([not tr.cr.is_result_interesting(self.min_percentage_change) for tr in test_results]):
+                        continue
+
                     test_results.complete()
 
                     machine_results.append((test, test_results))
@@ -96,7 +112,8 @@ class LatestRunsReport(object):
                 # If there are visible results for this test, append it to the
                 # view.
                 if machine_results:
-                    field_results.append((machine, len(machine_runs), machine_results))
+                    revisions = list(reversed([r.order.llvm_project_revision for r in machine_runs]))
+                    field_results.append((machine, revisions, machine_results))
 
             field_results.sort(key=lambda x: x[0].name)
             self.result_table.append((field, field_results))

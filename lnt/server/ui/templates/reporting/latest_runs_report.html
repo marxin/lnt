@@ -9,7 +9,7 @@
 <body style="{{ styles['body'] }}">
 {% endif %}
 
-<h2 style="text-align:center">Latest ({{ report.run_count }}) Runs Report</h2>
+<h2 style="text-align:center">Latest Runs Report</h2>
 
 {{ utils.regex_filter_box(input_id='machine-filter',
                           selector='.searchable-machine',
@@ -22,18 +22,38 @@
                           selector_part_to_search=".test-name")
 }}
 
+<h5>Server query filter</h5>
+<form method="GET">
+    <label>Number of runs:
+        <input type="number" min="2" max="100" name="num_runs" value="{{ report.run_count }}">
+    </label>
+    <label for="all_changes">Display all changes:
+        <input type="checkbox" name="all_changes" id="all_changes" {% if report.all_changes %}checked{% endif %} />
+    </label>
+    <label for="all_elf_detail_stats">Display all ELF detail stats:
+        <input type="checkbox" name="all_elf_detail_stats" id="all_elf_detail_stats" {% if report.all_elf_detail_stats %}checked{% endif %} />
+    </label>
+    <label>Minimum threshold (float number):
+        <input type="number" min="0.001" step="any" name="min_percentage_change" value="{{ report.min_percentage_change }}">
+    </label>
+    <label>GIT revisions (comma separated):
+        <input type="text" name="revisions" value="{{ report.revisions }}" style="width: 600px;">
+    </label>
+    <input type="submit" value="Generate">
+</form>
+
 {% for field, field_results in report.result_table %}
     {%- if field_results -%}
         {{ utils.render_popup_begin(field.display_name, field.display_name, false, element = 'h3') }}
-        {% for machine, machine_runs, machine_results in field_results %}
+        {% for machine, machine_run_orders, machine_results in field_results %}
             <div class="searchable-machine">
                 <h5 class="machine-name">{{machine.name}}</h5>
                 <table border="1" style="{{ styles.table }};">
                     <thead>
                         <tr>
                             <th style="{{ styles.th }}">Test Name</th>
-                            {% for i in range(machine_runs)|reverse %}
-                                <th style="{{ styles.th }}">Run #{{i + 1}}</th>
+                            {% for v in machine_run_orders|reverse %}
+                            <th style="{{ styles.th }}">Run #{{machine_run_orders|length - loop.index + 1}} {{ local.render_order_link_icon(v) }}</th>
                             {% endfor %}
                             <th style="{{ styles.th }}">Sparkline</th>
                         </tr>
@@ -46,7 +66,7 @@
                     report.ts.get_field_index(field)}}">{{test.name}}</a></td>
                                 {{ reportutils.get_initial_cell_value(test_results[-1], field, analysis, styles) }}
                                 {% for result in test_results[:-1]|reverse %}
-                                    {{ reportutils.get_cell_value(result, analysis, styles) }}
+                                    {{ reportutils.get_cell_value(result, analysis, styles, report.min_percentage_change) }}
                                 {% endfor %}
                                 <td>{{ reportutils.spark_plot(test_results) }}</td>
                             </tr>

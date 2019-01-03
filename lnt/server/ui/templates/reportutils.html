@@ -11,10 +11,10 @@
 {%- endif -%}
 {% endmacro %}
 
-{% macro get_cell_value(result, analysis, styles) %}
+{% macro get_cell_value(result, analysis, styles, min_percentage_change = None) %}
 {%- set cr = result.cr -%}
 {%- set test_status = cr.get_test_status() -%}
-{%- set value_status = cr.get_value_status() -%}
+{%- set value_status = cr.get_value_status(min_percentage_change = min_percentage_change) -%}
 {%- if (test_status == analysis.REGRESSED or
        test_status == analysis.UNCHANGED_FAIL) %}
     <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
