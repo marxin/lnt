@@ -35,8 +35,10 @@ class LatestRunsReport(object):
                 machine_results = []
                 q = session.query(ts.Run).filter(ts.Run.machine_id == machine.id)
 
-                if self.revisions != '':
-                    revisions_filters = [ts.Order.llvm_project_revision.contains(x) for x in self.revisions.split(',')]
+                revisions = [r.strip() for r in self.revisions.split(',') if r]
+
+                if len(revisions) > 0:
+                    revisions_filters = [ts.Order.llvm_project_revision.contains(x) for x in revisions]
                     q = q.join(ts.Order).filter(ts.Run.order_id == ts.Order.id)
                     q = q.filter(or_(*revisions_filters))
 
@@ -46,6 +48,10 @@ class LatestRunsReport(object):
 
                 if len(machine_runs) < 2:
                     continue
+
+                if len(revisions) > 0:
+                    machine_runs = [next((mr for mr in machine_runs if r in mr.order.llvm_project_revision), None) for r in revisions]
+                    machine_runs = [mr for mr in machine_runs if mr]
 
                 machine_runs_ids = [r.id for r in machine_runs]
 
