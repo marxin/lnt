@@ -7,6 +7,8 @@ import lnt.server.ui.app
 import sqlalchemy.sql
 import urllib
 
+from sqlalchemy import or_
+
 class LatestRunsReport(object):
     def __init__(self, ts, run_count, all_changes, all_elf_detail_stats, revisions, min_percentage_change):
         self.ts = ts
@@ -31,17 +33,16 @@ class LatestRunsReport(object):
             field_results = []
             for machine in machines:
                 machine_results = []
-                machine_runs = list(reversed(session.query(ts.Run)
-                    .filter(ts.Run.machine_id == machine.id)
-                    .order_by(ts.Run.start_time.desc())
-                    .limit(self.run_count)
-                    .all()))
+                q = session.query(ts.Run).filter(ts.Run.machine_id == machine.id)
 
                 if self.revisions != '':
-                    revisions = [x.strip() for x in self.revisions.split(',')]
-                    machine_runs = [next((mr for mr in machine_runs if mr.order.llvm_project_revision.split('.')[1] == r), None) for r in revisions]
-                    machine_runs = [mr for mr in machine_runs if mr]
+                    revisions_filters = [ts.Order.llvm_project_revision.contains(x) for x in self.revisions.split(',')]
+                    q = q.join(ts.Order).filter(ts.Run.order_id == ts.Order.id)
+                    q = q.filter(or_(*revisions_filters))
 
+                machine_runs = list(reversed(q.order_by(ts.Run.start_time.desc())
+                    .limit(self.run_count)
+                    .all()))
 
                 if len(machine_runs) < 2:
                     continue
