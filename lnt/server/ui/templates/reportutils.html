@@ -1,32 +1,16 @@
 {% macro get_initial_cell_value(result, field, analysis, styles) %}
-{%- set cr = result.cr -%}
-{%- set test_status = cr.get_test_status() -%}
-{%- if (test_status == analysis.REGRESSED or
-       test_status == analysis.UNCHANGED_FAIL) %}
-       <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
-{%- else %}
     <td style="{{ styles.td }}; {{ styles.right }}; background-color:#d2d2d2"> {#- -#}
-        {{ cr.current|print_value(field.unit, field.unit_abbrev) }}
+        {{ result.value|print_value(field.unit, field.unit_abbrev) }}
     </td>
-{%- endif -%}
 {% endmacro %}
 
 {% macro get_cell_value(result, analysis, styles, min_percentage_change = None) %}
-{%- set cr = result.cr -%}
-{%- set test_status = cr.get_test_status() -%}
-{%- set value_status = cr.get_value_status(min_percentage_change = min_percentage_change) -%}
-{%- if (test_status == analysis.REGRESSED or
-       test_status == analysis.UNCHANGED_FAIL) %}
-    <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
-{%- elif test_status == analysis.IMPROVED %}
-    <td style="{{ styles.td }}; background-color:#8fdf5f">PASS</td>
-{%- else -%}
+{%- set value_status = result.get_value_status(min_percentage_change = min_percentage_change) -%}
 {%- if (value_status == analysis.REGRESSED or
        value_status == analysis.IMPROVED) %}
-    {{ cr.pct_delta|aspctcell(reverse=cr.bigger_is_better, style = styles.right)|safe }}
+    {{ result.difference|aspctcell(reverse=False, style = styles.right)|safe }}
 {%- else %}
     <td style="{{ styles.td }}">-</td>
-{%- endif -%}
 {%- endif -%}
 {% endmacro %}
 

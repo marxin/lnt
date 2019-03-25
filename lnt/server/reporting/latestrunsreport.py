@@ -7,7 +7,33 @@ import lnt.server.ui.app
 import sqlalchemy.sql
 import urllib
 
-from sqlalchemy import or_
+from itertools import groupby
+
+from datetime import *
+from dateutil.relativedelta import relativedelta
+
+class MiniResult:
+    def __init__(self, value, difference):
+        self.value = value
+        self.difference = difference
+
+    def get_value_status(self, min_percentage_change):
+        # TODO
+        if self.difference < -min_percentage_change:
+            return lnt.server.reporting.analysis.IMPROVED
+        elif self.difference > min_percentage_change:
+            return lnt.server.reporting.analysis.REGRESSED
+        else:
+            return lnt.server.reporting.analysis.UNCHANGED_PASS
+
+class MiniComparisonResult:
+    def __init__(self, values):
+        b = values[0]
+        self.values = [MiniResult(x, x / b - 1) for x in values]
+
+    def is_interesting(self, min_percentage_change):
+        return any(map(lambda x: abs(x.difference) > min_percentage_change, self.values))
+        return abs(self.values[-1].difference) > min_percentage_change
 
 class LatestRunsReport(object):
     def __init__(self, ts, run_count, all_changes, all_elf_detail_stats, revisions, min_percentage_change):
@@ -26,103 +52,44 @@ class LatestRunsReport(object):
     def build(self, session):
         ts = self.ts
 
+        tests = session.query(ts.Test).all();
         machines = session.query(ts.Machine).all()
+        runs = session.query(ts.Run).all()
+
+        time_limit = datetime.now() - relativedelta(days = self.run_count)
+        samples = session.query(ts.Sample) \
+            .join(ts.Run) \
+            .join(ts.Test) \
+            .filter(ts.Sample.run_id == ts.Run.id) \
+            .filter(ts.Sample.test_id == ts.Test.id) \
+            .filter(ts.Run.start_time >= time_limit) \
+            .order_by(ts.Run.machine_id, ts.Test.id, ts.Run.start_time) \
+            .all()
 
         self.result_table = []
         for field in self.fields:
             field_results = []
-            for machine in machines:
+
+            for machine, g in groupby(samples, lambda x: x.run.machine):
                 machine_results = []
-                q = session.query(ts.Run).filter(ts.Run.machine_id == machine.id)
+                machine_samples = list(g)
+                revisions = None
 
-                revisions = [r.strip() for r in self.revisions.split(',') if r]
-
-                if len(revisions) > 0:
-                    revisions_filters = [ts.Order.llvm_project_revision.contains(x) for x in revisions]
-                    q = q.join(ts.Order).filter(ts.Run.order_id == ts.Order.id)
-                    q = q.filter(or_(*revisions_filters))
-
-                machine_runs = list(reversed(q.order_by(ts.Run.start_time.desc())
-                    .limit(self.run_count)
-                    .all()))
-
-                if len(machine_runs) < 2:
-                    continue
-
-                if len(revisions) > 0:
-                    machine_runs = [next((mr for mr in machine_runs if r in mr.order.llvm_project_revision), None) for r in revisions]
-                    machine_runs = [mr for mr in machine_runs if mr]
-
-                machine_runs_ids = [r.id for r in machine_runs]
-
-                # take all tests from latest run and do a comparison
-                oldest_run = machine_runs[0]
-
-                run_tests = session.query(ts.Test) \
-                        .join(ts.Sample) \
-                        .join(ts.Run) \
-                        .filter(ts.Sample.run_id == oldest_run.id) \
-                        .filter(ts.Sample.test_id == ts.Test.id) \
-                        .all()
-
-                # Create a run info object.
-                sri = lnt.server.reporting.analysis.RunInfo(session, ts, machine_runs_ids)
-
-                # Build the result table of tests with interesting results.
-                def compute_visible_results_priority(visible_results):
-                    # We just use an ad hoc priority that favors showing tests with
-                    # failures and large changes. We do this by computing the priority
-                    # as tuple of whether or not there are any failures, and then sum
-                    # of the mean percentage changes.
-                    test, results = visible_results
-                    had_failures = False
-                    sum_abs_deltas = 0.
-                    for result in results:
-                        test_status = result.cr.get_test_status()
-
-                        if (test_status == REGRESSED or test_status == UNCHANGED_FAIL):
-                            had_failures = True
-                        elif result.cr.pct_delta is not None:
-                            sum_abs_deltas += abs(result.cr.pct_delta)
-                    return (field.name, -int(had_failures), -sum_abs_deltas, test.name)
-
-                for test in run_tests:
-                    if not self.all_elf_detail_stats and 'elf/' in test.name:
+                for test, g in groupby(machine_samples, lambda x: x.test):
+                    test_samples = list(g)
+                    if len(test_samples) < 2:
+                        continue
+                    values = [x.get_field(field) for x in test_samples]
+                    if any(map(lambda x: x == None, values)):
                         continue
 
-                    cr = sri.get_comparison_result(
-                            [machine_runs[-1]], [oldest_run], test.id, field,
-                            self.hash_of_binary_field)
+                    cr = MiniComparisonResult(values)
+                    if cr.is_interesting(self.min_percentage_change):
+                        machine_results.append((test, cr.values))
+                    revisions = list(reversed([s.run.order.llvm_project_revision for s in test_samples]))
 
-                    if not self.all_changes and not cr.is_result_interesting(self.min_percentage_change):
-                        continue
-
-                    # For all previous runs, analyze comparison results
-                    test_results = RunResults()
-
-                    for run in reversed(machine_runs):
-                        cr = sri.get_comparison_result(
-                                [run], [oldest_run], test.id, field,
-                                self.hash_of_binary_field)
-                        test_results.append(RunResult(cr))
-
-                    # If all results are not "interesting", ignore them.
-                    if all([not tr.cr.is_result_interesting(self.min_percentage_change) for tr in test_results]):
-                        continue
-
-                    test_results.complete()
-
-                    machine_results.append((test, test_results))
-
-                machine_results.sort(key=compute_visible_results_priority)
-
-                # If there are visible results for this test, append it to the
-                # view.
-                if machine_results:
-                    revisions = list(reversed([r.order.llvm_project_revision for r in machine_runs]))
+                if len(machine_results) > 0:
                     field_results.append((machine, revisions, machine_results))
-
-            field_results.sort(key=lambda x: x[0].name)
             self.result_table.append((field, field_results))
 
     def render(self, ts_url, only_html_body=True):
