@@ -1522,11 +1522,11 @@ def v4_latest_runs_report():
     session = request.session
     ts = request.get_testsuite()
 
-    num_runs_str = request.args.get('num_runs')
-    if num_runs_str is not None:
-        num_runs = int(num_runs_str)
-    else:
-        num_runs = 10
+    younger_in_days_str = request.args.get('younger_in_days')
+    younger_in_days = int(younger_in_days_str) if younger_in_days_str else 14
+
+    older_in_days_str = request.args.get('older_in_days')
+    older_in_days = int(older_in_days_str) if older_in_days_str else 0
 
     all_changes = True if request.args.get('all_changes') else False
     all_elf_detail_stats = True if request.args.get('all_elf_detail_stats') else False
@@ -1541,7 +1541,7 @@ def v4_latest_runs_report():
         min_percentage_change = MIN_PERCENTAGE_CHANGE
 
     report = lnt.server.reporting.latestrunsreport.LatestRunsReport(ts,
-            num_runs, all_changes, all_elf_detail_stats, revisions,
+            younger_in_days, older_in_days, all_changes, all_elf_detail_stats, revisions,
             min_percentage_change)
     report.build(request.session)
 
