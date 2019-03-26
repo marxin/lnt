@@ -24,3 +24,7 @@
 #latest-run-report .value {
   width: 55px;
 }
+
+#latest-run-report .control-group {
+  margin-bottom: 2px;
+}

@@ -95,26 +95,50 @@
 <div class="row">
   <div class="span7">
     <h5>Server query filter</h5>
-    <form method="GET">
-      <label>Younger than N days:
-        <input type="number" name="younger_in_days" value="{{ report.younger_in_days}}">
-      </label>
-      <label>Older than N days:
-        <input type="number" name="older_in_days" value="{{ report.older_in_days}}">
-      </label>
-      <label for="all_changes">Display all changes:
-        <input type="checkbox" name="all_changes" id="all_changes" {% if report.all_changes %}checked{% endif %} />
-      </label>
-      <label for="all_elf_detail_stats">Display all ELF detail stats:
-        <input type="checkbox" name="all_elf_detail_stats" id="all_elf_detail_stats" {% if report.all_elf_detail_stats %}checked{% endif %} />
-      </label>
-      <label>Minimum threshold (float number):
-        <input type="number" min="0.001" step="any" name="min_percentage_change" value="{{ report.min_percentage_change }}">
-      </label>
-      <label>GIT revisions (comma separated):
-        <input type="text" name="revisions" value="{{ report.revisions }}" style="width: 300px;">
-      </label>
-      <input type="submit" value="Generate">
+    <form class="form-horizontal" method="GET">
+        <div class="control-group">
+            <label class="control-label" for="younger_in_days">Younger than N days:</label>
+            <div class="controls">
+                <input type="number" name="younger_in_days" value="{{ report.younger_in_days}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">Older than N days:</label>
+            <div class="controls">
+                <input type="number" name="older_in_days" value="{{ report.older_in_days}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="all_changes">Display all changes:</label>
+            <div class="controls">
+                <input type="checkbox" name="all_changes" id="all_changes" {% if report.all_changes %}checked{% endif %} />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="all_elf_detail_stats">Display all ELF stats:</label>
+            <div class="controls">
+                <input type="checkbox" name="all_elf_detail_stats" id="all_elf_detail_stats" {% if report.all_elf_detail_stats %}checked{% endif %} />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">Minimum threshold:</label>
+            <div class="controls">
+                <input type="number" min="0.001" step="any" name="min_percentage_change" value="{{ report.min_percentage_change }}">
+            </div>
+        </div>
+        <!--
+        <div class="control-group">
+            <label class="control-label">GIT revisions (comma separated):</label>
+            <div class="controls">
+                <input type="text" name="revisions" value="{{ report.revisions }}" style="width: 300px;">
+            </div>
+        </div>
+        -->
+        <div class="control-group">
+            <div class="controls">
+                <input type="submit" value="Generate">
+            </div>
+        </div>
     </form>
   </div>
   <div class="span5">
