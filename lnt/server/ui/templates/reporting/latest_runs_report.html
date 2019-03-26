@@ -51,9 +51,9 @@
                 <table border="1" style="{{ styles.table }};">
                     <thead>
                         <tr>
-                            <th style="{{ styles.th }}">Test Name</th>
+                            <th style="{{ styles.th }}; width: 320px;">Test Name</th>
                             {% for v in machine_run_orders|reverse %}
-                            <th style="{{ styles.th }}">#{{machine_run_orders|length - loop.index + 1}} {{ local.render_order_link_icon(v) }}</th>
+                            <th style="{{ styles.th }}; min-width: 40px;"><a>{{v[1]}}</a></th>
                             {% endfor %}
                             <th style="{{ styles.th }}">Sparkline</th>
                         </tr>
@@ -61,13 +61,14 @@
                     <tbody>
                         {% for test, test_results in machine_results %}
                             <tr class="searchable">
-                                <td class="test-name" style="{{ styles.td }}"><a href="{{
+                                <td class="test-name" style="{{ styles.td }}; width: 80px;"><a href="{{
                   ts_url}}/graph?plot.0={{machine.id}}.{{test.id}}.{{
                     report.ts.get_field_index(field)}}">{{test.name}}</a></td>
-                                {{ reportutils.get_initial_cell_value(test_results[0], field, analysis, styles) }}
-                                {% for result in test_results[1:] %}
+                                {{ reportutils.get_initial_cell_value(test_results.values[0], field, analysis, styles) }}
+                                {% for result in test_results.values[1:] %}
                                     {{ reportutils.get_cell_value(result, analysis, styles, report.min_percentage_change) }}
                                 {% endfor %}
+                                <td>{{ reportutils.spark_plot(test_results) }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

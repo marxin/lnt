@@ -54,6 +54,9 @@ def _get_rgb_colors_for_hashes(hash_strings):
             result.append(_toColorString(rgb))
     return result
 
+def get_rgb_colors_for_hashes(hash_strings):
+    return _get_rgb_colors_for_hashes(hash_strings)
+
 # Helper classes to make the sparkline chart construction easier in the jinja
 # template.
 class RunResult:

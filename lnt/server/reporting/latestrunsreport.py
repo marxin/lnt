@@ -6,34 +6,53 @@ import lnt.server.reporting.analysis
 import lnt.server.ui.app
 import sqlalchemy.sql
 import urllib
+import timeago
 
 from itertools import groupby
 
 from datetime import *
 from dateutil.relativedelta import relativedelta
+from lnt.server.reporting.analysis import *
+from lnt.server.reporting.report import *
 
 class MiniResult:
-    def __init__(self, value, difference):
-        self.value = value
-        self.difference = difference
+    def __init__(self, value, difference, hash, bigger_is_better):
+        self.cr = self
+        self.current = value
+        self.pct_delta = difference
+        self.hash_rgb_color = hash
+        self.cur_hash = hash
+        self.bigger_is_better = bigger_is_better
 
     def get_value_status(self, min_percentage_change):
         # TODO
-        if self.difference < -min_percentage_change:
-            return lnt.server.reporting.analysis.IMPROVED
-        elif self.difference > min_percentage_change:
-            return lnt.server.reporting.analysis.REGRESSED
+        if self.pct_delta < -min_percentage_change:
+            return IMPROVED
+        elif self.pct_delta> min_percentage_change:
+            return REGRESSED
         else:
-            return lnt.server.reporting.analysis.UNCHANGED_PASS
+            return UNCHANGED_PASS
+
+    def get_test_status(self):
+        return UNCHANGED_PASS
 
 class MiniComparisonResult:
-    def __init__(self, values):
+    def __init__(self, values, hashes, bigger_is_better):
+        self.values = []
+        self.min_sample = min(values)
+        self.max_sample = max(values)
+
         b = values[0]
-        self.values = [MiniResult(x, x / b - 1) for x in values]
+        rgb_colors = get_rgb_colors_for_hashes(hashes)
+        for i in range(len(values)):
+            self.values.append(MiniResult(values[i], values[i] / b - 1, rgb_colors[i], bigger_is_better))
 
     def is_interesting(self, min_percentage_change):
-        return any(map(lambda x: abs(x.difference) > min_percentage_change, self.values))
-        return abs(self.values[-1].difference) > min_percentage_change
+#        return any(map(lambda x: abs(x.pct_delta) > min_percentage_change, self.values))
+        return abs(self.values[-1].pct_delta) > min_percentage_change
+
+    def get_absolute_difference(self):
+        return abs(self.values[-1].pct_delta)
 
 class LatestRunsReport(object):
     def __init__(self, ts, run_count, all_changes, all_elf_detail_stats, revisions, min_percentage_change):
@@ -75,6 +94,10 @@ class LatestRunsReport(object):
                 machine_samples = list(g)
                 revisions = None
 
+                # TODO
+                if not 'trunk' in machine.name:
+                    continue
+
                 for test, g in groupby(machine_samples, lambda x: x.test):
                     test_samples = list(g)
                     if len(test_samples) < 2:
@@ -83,13 +106,17 @@ class LatestRunsReport(object):
                     if any(map(lambda x: x == None, values)):
                         continue
 
-                    cr = MiniComparisonResult(values)
+                    cr = MiniComparisonResult(values, [x.get_field(self.hash_of_binary_field) for x in test_samples],
+                            field.bigger_is_better)
                     if cr.is_interesting(self.min_percentage_change):
-                        machine_results.append((test, cr.values))
+                        machine_results.append((test, cr))
                     revisions = list(reversed([s.run.order.llvm_project_revision for s in test_samples]))
+                    agos = list(reversed([timeago.format(s.run.start_time, datetime.now()).replace(' ago', '') for s in test_samples]))
 
                 if len(machine_results) > 0:
-                    field_results.append((machine, revisions, machine_results))
+                    machine_results.sort(key = lambda x: x[1].get_absolute_difference(), reverse = True)
+                    field_results.append((machine, zip(revisions, agos), machine_results))
+            field_results.sort(key = lambda x: x[0].name)
             self.result_table.append((field, field_results))
 
     def render(self, ts_url, only_html_body=True):
