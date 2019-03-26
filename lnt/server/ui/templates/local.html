@@ -16,6 +16,10 @@
     </a>
 {%- endmacro %}
 
+{% macro render_git_link(llvm_project_revision, text) -%}
+  <a target="_blank" href="https://gcc.gnu.org/git/?p=gcc.git;a=commit;h={{llvm_project_revision | git_revision}}" title="{{llvm_project_revision | git_revision}}">{{ text }}</a>
+{%- endmacro %}
+
 
 {% macro render_compare_to_run(run, url) -%}
 <a href="{{url}}"><span class="utctime">{{ run.start_time.isoformat() }}</span> ({{ run.order.llvm_project_revision | git_revision }})</a>

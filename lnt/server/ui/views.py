@@ -1546,8 +1546,9 @@ def v4_latest_runs_report():
     report.build(request.session)
 
     return render_template("v4_latest_runs_report.html", report=report,
-                           analysis=lnt.server.reporting.analysis,
-                           **ts_data(ts))
+            ts_url = urljoin(request.base_url, '.').rstrip('/'),
+            analysis=lnt.server.reporting.analysis,
+            **ts_data(ts))
 
 @v4_route("/spec_report/<report_type>")
 def v4_spec_report(report_type):

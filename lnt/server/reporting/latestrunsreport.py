@@ -118,15 +118,3 @@ class LatestRunsReport(object):
                     field_results.append((machine, zip(revisions, agos), machine_results))
             field_results.sort(key = lambda x: x[0].name)
             self.result_table.append((field, field_results))
-
-    def render(self, ts_url, only_html_body=True):
-        # Strip any trailing slash on the testsuite URL.
-        if ts_url.endswith('/'):
-            ts_url = ts_url[:-1]
-
-        env = lnt.server.ui.app.create_jinja_environment()
-        template = env.get_template('reporting/latest_runs_report.html')
-
-        return template.render(
-            report=self, styles=report_css_styles, analysis=lnt.server.reporting.analysis,
-            ts_url=ts_url, only_html_body=only_html_body)

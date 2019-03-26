@@ -1,31 +1,31 @@
-{% macro get_initial_cell_value(result, field, analysis, styles) %}
+{% macro get_initial_cell_value(result, field, analysis) %}
 {%- set cr = result.cr -%}
 {%- set test_status = cr.get_test_status() -%}
 {%- if (test_status == analysis.REGRESSED or
        test_status == analysis.UNCHANGED_FAIL) %}
-       <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
+       <td style="background-color:#e98080">FAIL</td>
 {%- else %}
-    <td style="{{ styles.td }}; {{ styles.right }}; background-color:#d2d2d2"> {#- -#}
+    <td class="tr reference" style="background-color:#d2d2d2"> {#- -#}
         {{ cr.current|print_value(field.unit, field.unit_abbrev) }}
     </td>
 {%- endif -%}
 {% endmacro %}
 
-{% macro get_cell_value(result, analysis, styles, min_percentage_change = None) %}
+{% macro get_cell_value(result, analysis, min_percentage_change = None) %}
 {%- set cr = result.cr -%}
 {%- set test_status = cr.get_test_status() -%}
 {%- set value_status = cr.get_value_status(min_percentage_change = min_percentage_change) -%}
 {%- if (test_status == analysis.REGRESSED or
        test_status == analysis.UNCHANGED_FAIL) %}
-    <td style="{{ styles.td }}; background-color:#e98080">FAIL</td>
+    <td style="background-color:#e98080">FAIL</td>
 {%- elif test_status == analysis.IMPROVED %}
-    <td style="{{ styles.td }}; background-color:#8fdf5f">PASS</td>
+    <td style="background-color:#8fdf5f">PASS</td>
 {%- else -%}
 {%- if (value_status == analysis.REGRESSED or
        value_status == analysis.IMPROVED) %}
-    {{ cr.pct_delta|aspctcell(reverse=cr.bigger_is_better, style = styles.right)|safe }}
+       {{ cr.pct_delta|aspctcell(reverse=cr.bigger_is_better, class_ = "value tr")|safe }}
 {%- else %}
-    <td style="{{ styles.td }}">-</td>
+    <td class="value tc">-</td>
 {%- endif -%}
 {%- endif -%}
 {% endmacro %}
@@ -66,7 +66,7 @@
 {#- Make y-axis go upwards instead of downwards: #}
       <g transform="translate(0, {{full_height}}) scale(1, -1) ">
 {%- for dr in results.values|reverse -%}
-  {%- if dr is not none and not dr.cr.failed -%}
+  {%- if dr is not none -%}
     {%- set day_nr = loop.index %}
       {{ spark_hash_background(day_nr, dr) }}
       {# fuzz the x-coordinate slightly so that multiple samples with the same
@@ -81,7 +81,7 @@
     {%- if dr is not none -%}
       {%- set cr = dr.cr -%}
       {%- set day_nr = loop.index -%}
-      {%- if not cr.failed and cr.current is not none %}
+      {%- if cr.current is not none %}
           {{ spark_x_coord(day_nr) }} {{ spark_y_coord(day_nr, cr.current) }}
       {%- endif -%}
     {%- endif -%}

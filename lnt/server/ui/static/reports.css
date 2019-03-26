@@ -1,0 +1,26 @@
+/* Latest run report */
+
+.tr {
+  text-align: right;
+}
+
+.tc {
+  text-align: center;
+}
+
+#latest-run-report {
+  margin: 0 30px;
+  font-size: 85%;
+}
+
+#latest-run-report .test-name {
+  width: 350px;
+}
+
+#latest-run-report .reference {
+  width: 80px;
+}
+
+#latest-run-report .value {
+  width: 55px;
+}

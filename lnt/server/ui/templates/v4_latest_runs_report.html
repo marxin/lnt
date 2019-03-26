@@ -1,10 +1,89 @@
-{% set db = request.get_db() %}
+{% set nosidebar = True %}
+{% import "utils.html" as utils %}
+{% import "local.html" as local %}
+{% import "reportutils.html" as reportutils %}
 
 {% extends "layout.html" %}
-{% set components = [(ts.name, v4_url_for(".v4_recent_activity"))] %}
+{% set components = [(ts.name, v4_url_for(".v4_latest_runs_report"))] %}
+
 {% block title %}Latest Runs Report{% endblock %}
+
+{% block head %}
+<link href="/static/reports.css" rel="stylesheet"/>
+{% endblock %}
+
 {% block body %}
+<div id="latest-run-report">
+<h2 style="text-align:center">Latest Runs Report</h2>
 
-{{ report.render(v4_url_for('.v4_overview'))|safe }}
+{{ utils.regex_filter_box(input_id='machine-filter',
+                          selector='.searchable-machine',
+                          placeholder="Machine name regex...",
+                          selector_part_to_search=".machine-name")
+}}
+{{ utils.regex_filter_box(input_id='test-filter',
+                          selector='.searchable',
+                          placeholder="Test name regex...",
+                          selector_part_to_search=".test-name")
+}}
 
+<h5>Server query filter</h5>
+<form method="GET">
+    <label>Number of runs:
+        <input type="number" min="2" max="100" name="num_runs" value="{{ report.run_count }}">
+    </label>
+    <label for="all_changes">Display all changes:
+        <input type="checkbox" name="all_changes" id="all_changes" {% if report.all_changes %}checked{% endif %} />
+    </label>
+    <label for="all_elf_detail_stats">Display all ELF detail stats:
+        <input type="checkbox" name="all_elf_detail_stats" id="all_elf_detail_stats" {% if report.all_elf_detail_stats %}checked{% endif %} />
+    </label>
+    <label>Minimum threshold (float number):
+        <input type="number" min="0.001" step="any" name="min_percentage_change" value="{{ report.min_percentage_change }}">
+    </label>
+    <label>GIT revisions (comma separated):
+        <input type="text" name="revisions" value="{{ report.revisions }}" style="width: 600px;">
+    </label>
+    <input type="submit" value="Generate">
+</form>
+
+{% for field, field_results in report.result_table %}
+    {%- if field_results -%}
+        {{ utils.render_popup_begin(field.display_name, field.display_name, false, element = 'h4') }}
+        {% for machine, machine_run_orders, machine_results in field_results %}
+            <div class="searchable-machine">
+                <h5 class="machine-name">{{machine.name}}</h5>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            {% for v in machine_run_orders|reverse %}
+                            <th>{{ local.render_git_link(v[0], v[1]) }}</th>
+                            {% endfor %}
+                            <th>Sparkline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test, test_results in machine_results %}
+                            <tr class="searchable">
+                                <td class="test-name"><a href="{{
+                  ts_url}}/graph?plot.0={{machine.id}}.{{test.id}}.{{
+                    report.ts.get_field_index(field)}}">{{test.name}}</a></td>
+                                {{ reportutils.get_initial_cell_value(test_results.values[0], field, analysis) }}
+                                {% for result in test_results.values[1:] %}
+                                    {{ reportutils.get_cell_value(result, analysis, report.min_percentage_change) }}
+                                {% endfor %}
+                                <td>{{ reportutils.spark_plot(test_results) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        {{ utils.render_popup_end() }}
+    {% else %}
+        <h4>No significant {{ field.display_name }} changes found.</h4>
+    {%- endif -%}
+{% endfor %}
+</div>
 {% endblock %}
