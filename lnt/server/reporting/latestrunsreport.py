@@ -17,25 +17,15 @@ from lnt.server.reporting.report import *
 
 class MiniResult:
     def __init__(self, value, difference, hash, bigger_is_better):
-        self.cr = self
-        self.current = value
-        self.pct_delta = difference
+        self.value = value
+        self.delta = difference
         self.abs_delta = abs(difference)
         self.hash_rgb_color = hash
-        self.cur_hash = hash
+        self.hash = hash
         self.bigger_is_better = bigger_is_better
 
     def get_value_status(self, min_percentage_change):
-        # TODO
-        if self.pct_delta < -min_percentage_change:
-            return IMPROVED
-        elif self.pct_delta> min_percentage_change:
-            return REGRESSED
-        else:
-            return UNCHANGED_PASS
-
-    def get_test_status(self):
-        return UNCHANGED_PASS
+        return IMPROVED if self.abs_delta >= min_percentage_change else UNCHANGED_PASS
 
 class MiniComparisonResult:
     def __init__(self, values, hashes, bigger_is_better, all_changes):
