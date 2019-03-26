@@ -98,6 +98,10 @@ class LatestRunsReport(object):
                 if not 'trunk' in machine.name:
                     continue
 
+                # TODO
+                if 'honza' in machine.name:
+                    continue
+
                 for test, g in groupby(machine_samples, lambda x: x.test):
                     test_samples = list(g)
                     if len(test_samples) < 2:
