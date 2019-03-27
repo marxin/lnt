@@ -80,7 +80,7 @@ class SPECReport(object):
     def __init__(self, ts, report_type):
         self.ts = ts
         self.hash_of_binary_field = self.ts.Sample.get_hash_of_binary_field()
-        self.fields = list(ts.Sample.get_metric_fields())
+        self.fields = list([x for x in ts.Sample.get_metric_fields() if x.name in set(['execution_time', 'score'])])
         self.report_type = report_type
 
         # Computed values.
