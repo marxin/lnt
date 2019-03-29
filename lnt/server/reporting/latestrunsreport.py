@@ -5,6 +5,7 @@ from lnt.util import multidict
 import lnt.server.reporting.analysis
 import lnt.server.ui.app
 import sqlalchemy.sql
+from sqlalchemy import or_
 import urllib
 import timeago
 
@@ -84,6 +85,13 @@ class LatestRunsReport(object):
         if not self.all_elf_detail_stats:
             q = q.filter(sqlalchemy.not_(ts.Test.name.contains('elf/')))
 
+        filtered_revisions = [r.strip() for r in self.revisions.split(',') if r]
+
+        if len(filtered_revisions) > 0:
+            revisions_filters = [ts.Order.llvm_project_revision.contains(x) for x in filtered_revisions]
+            q = q.join(ts.Order).filter(ts.Run.order_id == ts.Order.id)
+            q = q.filter(or_(*revisions_filters))
+
         samples = q.all()
 
         self.result_table = []
@@ -98,14 +106,16 @@ class LatestRunsReport(object):
                 if not 'trunk' in machine.name:
                     continue
 
-                # TODO
-                if 'honza' in machine.name:
-                    continue
-
                 for test, g in groupby(machine_samples, lambda x: x.test):
                     test_samples = list(g)
+
+                    if len(filtered_revisions) > 0:
+                        test_samples = [next((t for t in test_samples if r in t.run.order.llvm_project_revision), None) for r in filtered_revisions]
+                        machine_runs = [t for t in test_samples if t]
+
                     if len(test_samples) < 2:
                         continue
+
                     values = [x.get_field(field) for x in test_samples]
                     if any(map(lambda x: x == None, values)):
                         continue
