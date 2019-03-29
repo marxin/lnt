@@ -76,10 +76,6 @@ class LatestRunsReport(object):
         q = session.query(ts.Sample) \
             .join(ts.Run) \
             .join(ts.Test) \
-            .filter(ts.Sample.run_id == ts.Run.id) \
-            .filter(ts.Sample.test_id == ts.Test.id) \
-            .filter(ts.Run.start_time >= younger_than) \
-            .filter(ts.Run.start_time <= older_than) \
             .order_by(ts.Run.machine_id, ts.Test.id, ts.Run.start_time)
 
         if not self.all_elf_detail_stats:
@@ -91,6 +87,11 @@ class LatestRunsReport(object):
             revisions_filters = [ts.Order.llvm_project_revision.contains(x) for x in filtered_revisions]
             q = q.join(ts.Order).filter(ts.Run.order_id == ts.Order.id)
             q = q.filter(or_(*revisions_filters))
+        else:
+            q = q.filter(ts.Sample.run_id == ts.Run.id) \
+            .filter(ts.Sample.test_id == ts.Test.id) \
+            .filter(ts.Run.start_time >= younger_than) \
+            .filter(ts.Run.start_time <= older_than)
 
         samples = q.all()
 
