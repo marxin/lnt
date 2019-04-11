@@ -50,7 +50,8 @@ class MiniComparisonResult:
         return self.values if self.all_changes else [self.values[-1]]
 
 class LatestRunsReport(object):
-    def __init__(self, ts, younger_in_days, older_in_days, all_changes, all_elf_detail_stats, revisions, min_percentage_change):
+    def __init__(self, ts, younger_in_days, older_in_days, all_changes, all_elf_detail_stats,
+            revisions, min_percentage_change, ignore_user_branches):
         self.ts = ts
         self.younger_in_days = younger_in_days
         self.older_in_days = older_in_days
@@ -60,6 +61,7 @@ class LatestRunsReport(object):
         self.min_percentage_change = min_percentage_change
         self.hash_of_binary_field = self.ts.Sample.get_hash_of_binary_field()
         self.fields = list(ts.Sample.get_metric_fields())
+        self.ignore_user_branches = ignore_user_branches
 
         # Computed values.
         self.result_table = None
@@ -105,6 +107,9 @@ class LatestRunsReport(object):
                 revisions = None
 
                 if not 'trunk' in machine.name:
+                    continue
+
+                if self.ignore_user_branches and 'honza' in machine.name:
                     continue
 
                 for test, g in groupby(machine_samples, lambda x: x.test):
