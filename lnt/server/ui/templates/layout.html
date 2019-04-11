@@ -159,10 +159,10 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{g.testsuite_name}}<b class="caret"></b></a>
                             <ul class="dropdown-menu">
                               <li><a href="{{ v4_url_for('.v4_latest_runs_report') }}">Latest Runs Report</a></li>
+                              <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'branch') }}">{{ g.testsuite_name }} Report: branch</a></li>
                               {% if g.testsuite_name == 'SPEC' %}
-                                <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'branch') }}">SPEC Report: branch</a></li>
-                                <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'tuning') }}">SPEC Report: tuning</a></li>
-                                <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'options') }}">SPEC Report: options</a></li>
+                              <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'tuning') }}">{{ g.testsuite_name }} Report: tuning</a></li>
+                              <li><a href="{{ v4_url_for('.v4_spec_report', report_type = 'options') }}">{{ g.testsuite_name }} Report: options</a></li>
                               {% endif %}
                               <li><a href="{{ v4_url_for('.v4_machines') }}">All Machines</a></li>
                                <li class="divider"></li>

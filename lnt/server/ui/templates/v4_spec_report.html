@@ -2,7 +2,7 @@
 
 {% extends "layout.html" %}
 {% set components = [(ts.name, v4_url_for(".v4_recent_activity"))] %}
-{% block title %}SPEC Report{% endblock %}
+{% block title %}Report{% endblock %}
 {% block body %}
 
 {{ report.render(v4_url_for('.v4_overview'))|safe }}

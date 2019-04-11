@@ -14,10 +14,18 @@ import urllib
 class MachineName:
     def __init__(self, name):
         parts = name.split('.')
-        self.machine = parts[0]
-        self.suite = parts[1]
-        self.compiler = parts[2]
-        self.options = parts[3]
+        if len(parts) == 4:
+            self.machine = parts[0]
+            self.suite = parts[1]
+            self.compiler = parts[2]
+            self.options = parts[3]
+        elif len(parts) == 3:
+            self.machine = parts[0]
+            self.suite = 'CPP'
+            self.compiler = parts[1]
+            self.options = parts[2]
+        else:
+            self.machine = None
 
     def __str__(self):
         return '.'.join([self.machine, self.suite, self.compiler, self.options])
@@ -28,7 +36,7 @@ class MachineName:
             and self.compiler == other.compiler)
 
     @staticmethod
-    def get_groups_by_tuning(machines):
+    def get_groups_by_tuning(machines, testsuite):
         generic_machines = [m for m in machines if m.mname.options.endswith('generic')]
         for g in generic_machines:
             for m in machines:
@@ -39,21 +47,28 @@ class MachineName:
                     break
 
     @staticmethod
-    def get_groups_by_options(machines):
-        bases = ['O2_native', 'Ofast_native']
-        for b in bases:
-            keyfunc = lambda x: (x.mname.machine, x.mname.suite, x.mname.compiler)
+    def get_groups_by_options(machines, testsuite):
+        keyfunc = lambda x: (x.mname.machine, x.mname.suite, x.mname.compiler)
+        if testsuite.name == 'CPP':
             for k, g in groupby(sorted(machines, key = keyfunc), keyfunc):
-                values = list(sorted(g, key = lambda x: (len(x.mname.options), 'lto' in x.mname.options)))
-
+                values = list(sorted(g, key = lambda x: x.mname.options))
                 for v in values:
                     v.title_name = v.mname.options
 
-                yield ('.'.join(k) + '.*', [m for m in values if m.mname.options.startswith(b)])
+                yield ('.'.join(k) + '.*', values)
+        else:
+            bases = ['O2_native', 'Ofast_native']
+            for b in bases:
+                for k, g in groupby(sorted(machines, key = keyfunc), keyfunc):
+                    values = list(sorted(g, key = lambda x: (len(x.mname.options), 'lto' in x.mname.options)))
+
+                    for v in values:
+                        v.title_name = v.mname.options
+
+                    yield ('.'.join(k) + '.*', [m for m in values if m.mname.options.startswith(b)])
 
     @staticmethod
-    def get_groups_by_branches(machines):
-        bases = ['O2_native', 'Ofast_native']
+    def get_groups_by_branches(machines, testsuite):
         keyfunc = lambda x: (x.mname.machine, x.mname.suite, x.mname.options)
         for k, g in groupby(sorted(machines, key = keyfunc), keyfunc):
             values = list(sorted(g, key = lambda x:x.mname.compiler))
@@ -80,7 +95,7 @@ class SPECReport(object):
     def __init__(self, ts, report_type):
         self.ts = ts
         self.hash_of_binary_field = self.ts.Sample.get_hash_of_binary_field()
-        self.fields = list([x for x in ts.Sample.get_metric_fields() if x.name in set(['execution_time', 'score'])])
+        self.fields = list([x for x in ts.Sample.get_metric_fields() if x.name in set(['execution_time', 'score', 'compile_time'])])
         self.report_type = report_type
 
         # Computed values.
@@ -91,7 +106,7 @@ class SPECReport(object):
 
         # TODO: fix properly
         machines = [m for m in session.query(ts.Machine).all() if not 'honza' in m.name]
-        machine_tuples = [MachineTuple(m) for m in machines]
+        machine_tuples = [m for m in [MachineTuple(m) for m in machines] if m.mname.machine != None]
 
         # take only groups with at least 2 members
         group_fn = None
@@ -102,7 +117,7 @@ class SPECReport(object):
         elif self.report_type == 'options':
             group_fn = MachineName.get_groups_by_options
 
-        machine_groups = [MachineGroup(x[0], x[1]) for x in group_fn(machine_tuples) if len(x[1]) >= 2]
+        machine_groups = [MachineGroup(x[0], x[1]) for x in group_fn(machine_tuples, self.ts) if len(x[1]) >= 2]
 
         self.result_table = []
         for field in self.fields:

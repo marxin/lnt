@@ -9,7 +9,7 @@
 <body style="{{ styles['body'] }}">
 {% endif %}
 
-<h2 style="text-align:center">SPEC report by {{ report.report_type }}</h2>
+<h2 style="text-align:center">{{ report.ts.name }} report by {{ report.report_type }}</h2>
 
 {{ utils.regex_filter_box(input_id='machine-filter',
                           selector='.searchable-machine',
