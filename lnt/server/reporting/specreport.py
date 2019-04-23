@@ -1,6 +1,6 @@
 from collections import namedtuple
 from lnt.server.reporting.analysis import REGRESSED, UNCHANGED_FAIL
-from lnt.server.reporting.report import RunResult, RunResults, report_css_styles
+from lnt.server.reporting.report import RunResult, RunResults, report_css_styles, is_user_machine_name
 from lnt.util import multidict
 from itertools import groupby
 
@@ -104,8 +104,7 @@ class SPECReport(object):
     def build(self, session):
         ts = self.ts
 
-        # TODO: fix properly
-        machines = [m for m in session.query(ts.Machine).all() if not 'honza' in m.name]
+        machines = [m for m in session.query(ts.Machine).all() if not is_user_machine_name(m.name)]
         machine_tuples = [m for m in [MachineTuple(m) for m in machines] if m.mname.machine != None]
 
         # take only groups with at least 2 members

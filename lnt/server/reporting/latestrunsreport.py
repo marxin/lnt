@@ -1,6 +1,6 @@
 from collections import namedtuple
 from lnt.server.reporting.analysis import REGRESSED, UNCHANGED_FAIL
-from lnt.server.reporting.report import RunResult, RunResults, report_css_styles
+from lnt.server.reporting.report import RunResult, RunResults, report_css_styles, is_user_machine_name
 from lnt.util import multidict
 import lnt.server.reporting.analysis
 import lnt.server.ui.app
@@ -109,7 +109,7 @@ class LatestRunsReport(object):
                 if not 'trunk' in machine.name:
                     continue
 
-                if self.ignore_user_branches and 'honza' in machine.name:
+                if self.ignore_user_branches and is_user_machine_name(machine.name):
                     continue
 
                 for test, g in groupby(machine_samples, lambda x: x.test):

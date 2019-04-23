@@ -132,3 +132,6 @@ report_css_styles = {
         "td": "padding:5px; padding-left:8px",
         "right": "text-align: right;"
         }
+
+def is_user_machine_name(name):
+    return 'honza' in name or 'marxin' in name
