@@ -922,6 +922,13 @@ def v4_graph():
     graph_datum = []
     overview_plots = []
     baseline_plots = []
+
+    baseline_plots.append({
+        'color': '#ff661a',
+        'lineWidth': 2,
+        'xaxis': {'from': 1556868556000, 'to': 1556868556000},
+        })
+
     revision_cache = {}
     num_plots = len(graph_parameters)
     for i, (machine, test, field, field_index) in enumerate(graph_parameters):
