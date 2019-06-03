@@ -119,6 +119,7 @@ class LatestRunsReport(object):
                         test_samples = [next((t for t in test_samples if r in t.run.order.llvm_project_revision), None) for r in filtered_revisions]
                         machine_runs = [t for t in test_samples if t]
 
+                    test_samples = [ts for ts in test_samples if ts]
                     if len(test_samples) < 2:
                         continue
 
