@@ -21,6 +21,7 @@ def post_submit_tasks(session, ts, run_id):
     """Run the field change related post submission tasks.
 
     """
+    return
     regenerate_fieldchanges_for_run(session, ts, run_id)
 
 

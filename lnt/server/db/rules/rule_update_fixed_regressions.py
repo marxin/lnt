@@ -92,6 +92,7 @@ def regression_evolution(session, ts, run_id):
     Look at regressions in detect, do they match our policy? If no, move to
     NTBF.
     """
+    return
     logger.info("Running regression evolution")
     changed = 0
     evolve_states = [RegressionState.DETECTED, RegressionState.STAGED,
