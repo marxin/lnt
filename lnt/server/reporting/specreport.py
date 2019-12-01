@@ -95,7 +95,7 @@ class SPECReport(object):
     def __init__(self, ts, report_type):
         self.ts = ts
         self.hash_of_binary_field = self.ts.Sample.get_hash_of_binary_field()
-        self.fields = list([x for x in ts.Sample.get_metric_fields() if x.name in set(['execution_time', 'score', 'compile_time'])])
+        self.fields = list([x for x in ts.Sample.get_metric_fields() if x.name in set(['execution_time', 'score', 'compile_time', 'size'])])
         self.report_type = report_type
 
         # Computed values.
@@ -149,6 +149,7 @@ class SPECReport(object):
                 run_tests = session.query(ts.Test) \
                         .join(ts.Sample) \
                         .join(ts.Run) \
+                        .filter(sqlalchemy.not_(ts.Test.name.contains('elf/')))
                         .filter(ts.Sample.run_id == latest_branch_run.id) \
                         .filter(ts.Sample.test_id == ts.Test.id) \
                         .all()
