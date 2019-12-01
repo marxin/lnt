@@ -149,7 +149,7 @@ class SPECReport(object):
                 run_tests = session.query(ts.Test) \
                         .join(ts.Sample) \
                         .join(ts.Run) \
-                        .filter(sqlalchemy.not_(ts.Test.name.contains('elf/')))
+                        .filter(sqlalchemy.not_(ts.Test.name.contains('elf/'))) \
                         .filter(ts.Sample.run_id == latest_branch_run.id) \
                         .filter(ts.Sample.test_id == ts.Test.id) \
                         .all()
