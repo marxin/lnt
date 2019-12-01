@@ -1546,11 +1546,11 @@ def v4_latest_runs_report():
         min_percentage_change = float(min_percentage_change)
     else:
         min_percentage_change = MIN_PERCENTAGE_CHANGE
-    ignore_user_branches = True if request.args.get('ignore_user_branches') else False
+    include_user_branches = True if request.args.get('include_user_branches') else False
 
     report = lnt.server.reporting.latestrunsreport.LatestRunsReport(ts,
             younger_in_days, older_in_days, all_changes, all_elf_detail_stats, revisions,
-            min_percentage_change, ignore_user_branches)
+            min_percentage_change, include_user_branches)
     report.build(request.session)
 
     return render_template("v4_latest_runs_report.html", report=report,
