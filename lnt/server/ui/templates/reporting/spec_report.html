@@ -4,13 +4,38 @@
 {% if not only_html_body %}
 <html>
 <head>
-    <title>Latest ({{ report.num_days }}) Runs Report</title>
 </head>
 <body style="{{ styles['body'] }}">
 {% endif %}
 
+<link href="/static/reports.css" rel="stylesheet"/>
 <h2 style="text-align:center">{{ report.ts.name }} report by {{ report.report_type }}</h2>
 
+<div class="row">
+  <div class="span7">
+    <h5>Server query filter</h5>
+    <form class="form-horizontal" method="GET">
+        <div class="control-group">
+            <label class="control-label">Filtering&amp;Sorting (like 'gcc-6,gcc-trunk)':</label>
+            <div class="controls">
+                <input type="text" name="sorting" value="{{ report.sorting}}">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="all_elf_detail_stats">Display all ELF stats:</label>
+            <div class="controls">
+                <input type="checkbox" name="all_elf_detail_stats" id="all_elf_detail_stats" {% if report.all_elf_detail_stats %}checked{% endif %} />
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <input type="submit" value="Generate">
+            </div>
+        </div>
+    </form>
+  </div>
+  <div class="span5">
+    <h5>Result filter</h5>
 {{ utils.regex_filter_box(input_id='machine-filter',
                           selector='.searchable-machine',
                           placeholder="Machine name regex...",
@@ -21,7 +46,10 @@
                           placeholder="Test name regex...",
                           selector_part_to_search=".test-name")
 }}
+  </div>
+</div>
 
+<div id="latest-run-report">
 {% for field, field_results in report.result_table %}
     {%- if field_results -%}
         {{ utils.render_popup_begin(field.display_name, field.display_name, false, element = 'h3') }}
@@ -31,9 +59,9 @@
                 <table border="1" style="{{ styles.table }};">
                     <thead>
                         <tr>
-                            <th style="{{ styles.th }}">Test Name</th>
+                            <th>Test Name</th>
                             {% for i in range(group_size) %}
-                                <th style="{{ styles.th }}">{{ machine_group.machines[i].title_name}}</th>
+                                <th>{{ machine_group.machines[i].title_name}}</th>
                             {% endfor %}
                         </tr>
                     </thead>
@@ -56,6 +84,7 @@
         <h3>No significant {{ field.display_name }} changes found.</h3>
     {%- endif -%}
 {% endfor %}
+</div>
 
 {% if not only_html_body %}
 </body>

@@ -1567,7 +1567,12 @@ def v4_spec_report(report_type):
     if not report_type in report_types:
         return "wrong report type", 500
 
-    report = lnt.server.reporting.specreport.SPECReport(ts, report_type)
+    sorting = request.args.get('sorting')
+    if not sorting:
+        sorting = ""
+    all_elf_detail_stats = True if request.args.get('all_elf_detail_stats') else False
+
+    report = lnt.server.reporting.specreport.SPECReport(ts, report_type, all_elf_detail_stats, sorting)
     report.build(request.session)
 
     return render_template("v4_spec_report.html", report=report,

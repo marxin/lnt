@@ -85,6 +85,7 @@ class MachineTuple:
         self.mname = MachineName(machine.name)
         self.title_name = None
         self.run = None
+        self.order = None
 
 class MachineGroup:
     def __init__(self, title_name, machines):
@@ -92,11 +93,13 @@ class MachineGroup:
         self.machines = machines
 
 class SPECReport(object):
-    def __init__(self, ts, report_type):
+    def __init__(self, ts, report_type, all_elf_detail_stats, sorting):
         self.ts = ts
         self.hash_of_binary_field = self.ts.Sample.get_hash_of_binary_field()
         self.fields = list([x for x in ts.Sample.get_metric_fields() if x.name in set(['execution_time', 'score', 'compile_time', 'size'])])
         self.report_type = report_type
+        self.all_elf_detail_stats = all_elf_detail_stats
+        self.sorting = sorting
 
         # Computed values.
         self.result_table = None
@@ -117,6 +120,17 @@ class SPECReport(object):
             group_fn = MachineName.get_groups_by_options
 
         machine_groups = [MachineGroup(x[0], x[1]) for x in group_fn(machine_tuples, self.ts) if len(x[1]) >= 2]
+
+        if self.sorting:
+            filtered_sorting = [r.strip() for r in self.sorting.split(',') if r]
+            for group in machine_groups:
+                for i in range(len(filtered_sorting)):
+                    for m in group.machines:
+                        if m.title_name == filtered_sorting[i]:
+                            m.order = i
+                            break
+                group.machines = sorted([m for m in group.machines if m.order != None], key = lambda x: x.order)
+            machine_groups = [mg for mg in machine_groups if len(mg.machines) >= 2]
 
         self.result_table = []
         for field in self.fields:
@@ -146,13 +160,14 @@ class SPECReport(object):
                 latest_branch_run = machine_group.machines[-1].run
                 oldest_branch_run = machine_group.machines[0].run
 
-                run_tests = session.query(ts.Test) \
+                q = session.query(ts.Test) \
                         .join(ts.Sample) \
                         .join(ts.Run) \
-                        .filter(sqlalchemy.or_(sqlalchemy.not_(ts.Test.name.contains('elf/')), ts.Test.name.contains('total/elf/sections/text'))) \
                         .filter(ts.Sample.run_id == latest_branch_run.id) \
-                        .filter(ts.Sample.test_id == ts.Test.id) \
-                        .all()
+                        .filter(ts.Sample.test_id == ts.Test.id)
+                if not self.all_elf_detail_stats:
+                    q = q.filter(sqlalchemy.or_(sqlalchemy.not_(ts.Test.name.contains('elf/')), ts.Test.name.contains('total/elf/sections/text')))
+                run_tests = q.all()
 
                 # Create a run info object.
                 sri = lnt.server.reporting.analysis.RunInfo(session, ts, group_runs_ids)
