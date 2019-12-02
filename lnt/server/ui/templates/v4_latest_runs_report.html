@@ -14,7 +14,7 @@
        value_status == analysis.IMPROVED) %}
        {{ result.delta|aspctcell(reverse=result.bigger_is_better, class_ = "value tr")|safe }}
 {%- else %}
-    <td class="value tc">-</td>
+    <td class="value tc" style="background-color: #e8e8e8">~</td>
 {%- endif -%}
 {% endmacro %}
 
