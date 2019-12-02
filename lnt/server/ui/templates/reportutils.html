@@ -25,7 +25,7 @@
        value_status == analysis.IMPROVED) %}
     {{ cr.pct_delta|aspctcell(reverse=cr.bigger_is_better, style = styles.right)|safe }}
 {%- else %}
-    <td style="{{ styles.td }}">-</td>
+    <td style="{{ styles.td }}; background-color:#e8e8e8; text-align: center;">~</td>
 {%- endif -%}
 {%- endif -%}
 {% endmacro %}
