@@ -18,11 +18,13 @@ class MachineName:
             self.machine = parts[0]
             self.suite = parts[1]
             self.compiler = parts[2]
+            self.compiler_version = 999 if 'trunk' in self.compiler else int(self.compiler.split('-')[-1])
             self.options = parts[3]
         elif len(parts) == 3:
             self.machine = parts[0]
             self.suite = 'CPP'
             self.compiler = parts[1]
+            self.compiler_version = 999 if 'trunk' in self.compiler else int(self.compiler.split('-')[-1])
             self.options = parts[2]
         else:
             self.machine = None
@@ -48,7 +50,7 @@ class MachineName:
 
     @staticmethod
     def get_groups_by_options(machines, testsuite):
-        keyfunc = lambda x: (x.mname.machine, x.mname.suite, x.mname.compiler)
+        keyfunc = lambda x: (x.mname.machine, x.mname.suite, x.mname.compiler_version)
         if testsuite.name == 'CPP':
             for k, g in groupby(sorted(machines, key = keyfunc), keyfunc):
                 values = list(sorted(g, key = lambda x: x.mname.options))
@@ -71,7 +73,7 @@ class MachineName:
     def get_groups_by_branches(machines, testsuite):
         keyfunc = lambda x: (x.mname.machine, x.mname.suite, x.mname.options)
         for k, g in groupby(sorted(machines, key = keyfunc), keyfunc):
-            values = list(sorted(g, key = lambda x:x.mname.compiler))
+            values = list(sorted(g, key = lambda x:x.mname.compiler_version))
             mname = values[0].mname
             group_name = '.'.join([mname.machine, mname.suite, '*', mname.options])
 
