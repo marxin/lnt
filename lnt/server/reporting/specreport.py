@@ -67,7 +67,7 @@ class MachineName:
                     for v in values:
                         v.title_name = v.mname.options
 
-                    yield ('.'.join(k) + '.*', [m for m in values if m.mname.options.startswith(b)])
+                    yield ('.'.join([str(x) for x in k]) + '.*', [m for m in values if m.mname.options.startswith(b)])
 
     @staticmethod
     def get_groups_by_branches(machines, testsuite):
