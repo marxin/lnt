@@ -928,6 +928,12 @@ def v4_graph():
         'lineWidth': 2,
         'xaxis': {'from': 1556868556000, 'to': 1556868556000},
         })
+    baseline_plots.append({
+        'color': '#ff661a',
+        'lineWidth': 2,
+        'xaxis': {'from': 1595858665000, 'to': 1595858665000},
+        })
+
 
     revision_cache = {}
     num_plots = len(graph_parameters)
