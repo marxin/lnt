@@ -13,7 +13,7 @@ def pairs(list):
 
 # The hash color palette avoids green and red as these colours are already used
 # in quite a few places to indicate "good" or "bad".
-_hash_color_palette = (
+_hash_color_palette = 5 * (
     colorsys.hsv_to_rgb(h=45. / 360, s=0.3, v=0.9999),  # warm yellow
     colorsys.hsv_to_rgb(h=210. / 360, s=0.3, v=0.9999),  # blue cyan
     colorsys.hsv_to_rgb(h=300. / 360, s=0.3, v=0.9999),  # mid magenta
